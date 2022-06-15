@@ -1,10 +1,11 @@
 import { Provider } from 'react-redux'
-import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
+
+import { store } from './store'
 
 import { Nodes } from './components/Nodes'
 import { Messages } from './components/Messages'
-import { store } from './store'
+import { Graph } from './components/Graph'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Provider store={store}>
         <Nodes />
         <Messages />
+        <Graph />
       </Provider>
     </Canvas>
   )

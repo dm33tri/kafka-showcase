@@ -1,13 +1,26 @@
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export interface Message {
+  id: number
+  timestamp: number
   from: number
   to: number[]
-  id: number
 }
 
 let id = 0;
 const MAX_MESSAGES = 1000;
+
+const getRandomNodes = () => {
+  const from = Math.round(Math.random() * 5)
+  let toSet = new Set([
+    Math.round(Math.random() * 5),
+    Math.round(Math.random() * 5),
+    Math.round(Math.random() * 5)
+  ])
+  toSet.delete(from)
+  const to = Array.from(toSet)
+  return { from, to }
+}
 
 export const messagesApi = createApi({
   reducerPath: 'messagesApi',
@@ -23,15 +36,9 @@ export const messagesApi = createApi({
         await cacheDataLoaded
         const interval = setInterval(() => {
           updateCachedData(messages => {
-            const from = Math.round(Math.random() * 5)
-            let toSet = new Set([
-              Math.round(Math.random() * 5),
-              Math.round(Math.random() * 5),
-              Math.round(Math.random() * 5)
-            ])
-            toSet.delete(from)
-            const to = Array.from(toSet)
-            messages[(id++) % MAX_MESSAGES] = { id, from, to }
+            const { from, to } = getRandomNodes()
+            const timestamp = Date.now()
+            messages[(id++) % MAX_MESSAGES] = { id, from, to, timestamp }
           })
         }, 1000)
         await cacheEntryRemoved
@@ -59,7 +66,7 @@ export const messagesApi = createApi({
       async onQueryStarted({ from, to }, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(messagesApi.util.updateQueryData('getMessage', undefined, messages => {
-          messages[(id++) % MAX_MESSAGES] = { id, from, to }
+          messages[(id++) % MAX_MESSAGES] = { id, from, to, timestamp: Date.now() }
         }))
       }
     })
