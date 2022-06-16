@@ -5,6 +5,7 @@ export interface Message {
   timestamp: number
   from: number
   to: number[]
+  data: string
 }
 
 let id = 0;
@@ -38,7 +39,10 @@ export const messagesApi = createApi({
           updateCachedData(messages => {
             const { from, to } = getRandomNodes()
             const timestamp = Date.now()
-            messages[(id++) % MAX_MESSAGES] = { id, from, to, timestamp }
+            messages.push({ from, to, id: id++, timestamp: Date.now(), data: Math.random().toString() })
+            if (messages.length > MAX_MESSAGES * 2) {
+              messages.splice(0, messages.length - MAX_MESSAGES)
+            }
           })
         }, 1000)
         await cacheEntryRemoved
@@ -59,14 +63,17 @@ export const messagesApi = createApi({
         // ws.close()
       }
     }),
-    sendMessage: builder.mutation<void, Omit<Message, 'id'>>({
+    sendMessage: builder.mutation<void, Omit<Message, 'id' | 'timestamp'>>({
       queryFn() {
         return { data: undefined }
       },
-      async onQueryStarted({ from, to }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ from, to, data }, { dispatch, queryFulfilled }) {
         await queryFulfilled
         dispatch(messagesApi.util.updateQueryData('getMessage', undefined, messages => {
-          messages[(id++) % MAX_MESSAGES] = { id, from, to, timestamp: Date.now() }
+          messages.push({ from, to, data, id: id++, timestamp: Date.now() })
+          if (messages.length > MAX_MESSAGES * 2) {
+            messages.splice(0, messages.length - MAX_MESSAGES)
+          }
         }))
       }
     })

@@ -36,14 +36,16 @@ export const Node: FC<NodeProps> = ({ id, initialPosition }) => {
 
   const onClick = useCallback(() => {
     if (nodes) {
-      sendMessage({ 
+      sendMessage({
         from: id,
-        to: nodes.filter(({ id: otherId }) => otherId !== id).map(node => node.id)
+        to: nodes.filter(({ id: otherId }) => otherId !== id).map(node => node.id),
+        data: Math.random().toString()
       })
     }
   }, [sendMessage, nodes])
 
   return (
+     // @ts-ignore
     <RoundedBox
       {...drag()}
       onClick={onClick}
@@ -53,7 +55,7 @@ export const Node: FC<NodeProps> = ({ id, initialPosition }) => {
       smoothness={4}
       ref={ref}
     >
-      <meshBasicMaterial color="grey" />
+      <meshBasicMaterial color="white" />
     </RoundedBox>
   )
 }
@@ -66,10 +68,10 @@ export const Nodes: FC = () => {
       return null
     }
 
-    const circle = new THREE.EllipseCurve(0, 0, 5, 5, 0, 2 * Math.PI, false, 0).getPoints(data.length)
+    const circle = new THREE.EllipseCurve(0, 0, 3, 3, 0, 2 * Math.PI, false, 0).getPoints(data.length)
 
     return data.map(({ id }, index) => {
-      const initialPosition = new THREE.Vector3(circle[index].x, circle[index].y, 0).add(new THREE.Vector3(-.5, .5, 0))
+      const initialPosition = new THREE.Vector3(circle[index].x, circle[index].y, 0)
       return <Node key={id} id={id} initialPosition={initialPosition} />
     })
   }, [data])

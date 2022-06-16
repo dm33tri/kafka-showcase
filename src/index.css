@@ -1,18 +1,8 @@
-* {
-  box-sizing: border-box;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html,
-body,
-#root {
-  width: 100%;
+html, body, #root {
   height: 100%;
-  margin: 0;
-  padding: 0;
-  touch-action: none;
-}
-
-body {
-  background: linear-gradient(90deg, #181818 60px, transparent 1%) center, linear-gradient(#181818 60px, transparent 1%) center, #505050;
-  background-size: 62px 62px;
+  user-select: none;
 }

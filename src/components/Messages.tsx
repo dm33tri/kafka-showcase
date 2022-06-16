@@ -34,7 +34,8 @@ export const Message: FC<MessageProps> = ({ from, to }) => {
     ref.current.visible = true
   })
 
-  return time.current < 1 ? <Point ref={ref} /> : null
+  // @ts-ignore
+  return time.current < 1 ? <Point ref={ref} position={[-Infinity, -Infinity, 0]} /> : null
 }
 
 export const Messages: FC = () => {
@@ -48,7 +49,7 @@ export const Messages: FC = () => {
 
   return (
     <Points>
-      <pointsMaterial color="white" size={2} />
+      <pointsMaterial color="white" size={4} />
       {messages}
     </Points>
   )
