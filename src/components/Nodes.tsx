@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux"
 import * as THREE from "three"
 import type { Vector3 } from "three"
 import { useThree } from "@react-three/fiber"
-import { RoundedBox } from "@react-three/drei"
+import { RoundedBox, Text } from "@react-three/drei"
 import { useDrag } from '@use-gesture/react'
 
 import { setNodeGeometry } from '../slices/nodeGeometries'
@@ -14,12 +14,11 @@ type NodeProps = NodeType & {
   initialPosition: Vector3
 }
 
-export const Node: FC<NodeProps> = ({ id, initialPosition }) => {
+export const Node: FC<NodeProps> = ({ id, type, initialPosition }) => {
   const ref = useRef<any>()
   const [position, setPosition] = useState(initialPosition)
   const dispatch = useDispatch()
   const [sendMessage] = useSendMessageMutation()
-  const { data: nodes } = useGetAllNodesQuery()
 
   const { size, camera } = useThree()
 
@@ -27,6 +26,7 @@ export const Node: FC<NodeProps> = ({ id, initialPosition }) => {
     dispatch(setNodeGeometry({ id, ref }))
   }, [id])
 
+  // @ts-ignore
   const drag = useDrag(({ xy: [x, y] }) => {
     const newPos = new THREE.Vector3((x / size.width) * 2 - 1, -(y / size.height) * 2 + 1, 0)
       .unproject(camera)
@@ -35,10 +35,10 @@ export const Node: FC<NodeProps> = ({ id, initialPosition }) => {
   })
 
   const onClick = useCallback(() => {
-    if (nodes) {
+    if (type === 'PRODUCER') {
       sendMessage()
     }
-  }, [sendMessage, nodes])
+  }, [sendMessage, type])
 
   return (
      // @ts-ignore
@@ -51,7 +51,10 @@ export const Node: FC<NodeProps> = ({ id, initialPosition }) => {
       smoothness={4}
       ref={ref}
     >
-      <meshBasicMaterial color="white" />
+      <meshBasicMaterial color="black" />
+      <Text position={[0, 0, 1]} fontSize={0.25}>
+        {id}
+      </Text>
     </RoundedBox>
   )
 }
@@ -64,7 +67,7 @@ export const Nodes: FC = () => {
       return null
     }
 
-    const circle = new THREE.EllipseCurve(0, 0, 3, 3, 0, 2 * Math.PI, false, 0).getPoints(data.length)
+    const circle = new THREE.EllipseCurve(0, 0, 2, 2, 0, 2 * Math.PI, false, 0).getPoints(data.length)
 
     return data.map(({ id, type }, index) => {
       const initialPosition = new THREE.Vector3(circle[index].x, circle[index].y, 0)

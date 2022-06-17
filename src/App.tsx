@@ -7,6 +7,7 @@ import { Nodes } from './components/Nodes'
 import { Messages } from './components/Messages'
 import { Graph } from './components/Graph'
 import { Log } from './components/Log'
+import { Controls } from './components/Controls'
 
 function App() {
   return (
@@ -22,8 +23,9 @@ function App() {
           <Graph />
         </div>
       </div>
-      <aside className="w-1/4 p-4 border-gray-800 border-l-2">
+      <aside className="flex flex-col w-1/4 p-4 border-gray-800 border-l-2">
         <Log />
+        <Controls />
       </aside>
     </main>
   )

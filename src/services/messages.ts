@@ -29,7 +29,7 @@ export const messagesApi = createApi({
     }),
     sendMessage: builder.mutation<void, void>({
       query: () => 'message',
-      async onQueryStarted(_, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         const timestamp = Date.now()
         const id = getMessageId()
         const { data: nodes } = nodesApi.endpoints.getAllNodes.select()(store.getState())

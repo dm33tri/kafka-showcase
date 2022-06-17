@@ -9,27 +9,35 @@ export type Node = {
 
 export const nodesApi = createApi({
   reducerPath: 'nodesApi',
+  tagTypes: ['Nodes'],
   baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
   endpoints: (builder) => ({
     createConsumer: builder.mutation<void, number>({
-      query: id => `consumer?id=${id}`,
-      async onQueryStarted(id, { dispatch, queryFulfilled }) {
-        await queryFulfilled
+      query: id => ({
+        url: `consumer?id=${id}`,
+        method: 'post',
+        validateStatus: () => true
+      }),
+      async onQueryStarted(id, { dispatch }) {
         dispatch(nodesApi.util.updateQueryData('getAllNodes', undefined, nodes => {
           nodes.push({ id: `consumer_${id}`, type: 'CONSUMER' })
         }))
       }
     }),
     createProducer: builder.mutation<void, number>({
-      query: id => `producer?id=${id}`,
-      async onQueryStarted(id, { dispatch, queryFulfilled }) {
-        await queryFulfilled
+      query: id => ({
+        url: `producer?id=${id}`,
+        method: 'post',
+        validateStatus: () => true,
+      }),
+      async onQueryStarted(id, { dispatch }) {
         dispatch(nodesApi.util.updateQueryData('getAllNodes', undefined, nodes => {
           nodes.push({ id: `producer_${id}`, type: 'PRODUCER' })
         }))
-      }
+      },
     }),
     getAllNodes: builder.query<Node[], void>({
+      providesTags: ['Nodes'],
       queryFn() {
         return { data: [{ type: 'TOPIC', id: 'topic_0' }] }
       },
@@ -64,4 +72,4 @@ export const nodesApi = createApi({
   }),
 })
 
-export const { useGetAllNodesQuery } = nodesApi
+export const { useGetAllNodesQuery, useCreateConsumerMutation, useCreateProducerMutation } = nodesApi
