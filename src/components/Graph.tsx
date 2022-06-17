@@ -12,10 +12,9 @@ export const Graph: FC = () => {
     if (!data) {
         return
     }
-    const now = Date.now()
     return [{
       name: 'Data transfered (bytes)',
-      data: data.filter(Boolean).reduce((acc, message) => {
+      data: data.filter(Boolean).sort((a, b) => new Date(a.timestamp).valueOf() - new Date(b.timestamp).valueOf()).reduce((acc, message) => {
         const time = Math.floor(message.timestamp / 1000)
         if (acc.length == 0 || time !== acc[acc.length - 1].x) {
           acc.push({ x: time, y: message.to.length * message.data.length })

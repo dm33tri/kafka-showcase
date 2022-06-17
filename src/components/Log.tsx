@@ -8,8 +8,8 @@ export const Log: FC = () => {
     if (!data) {
         return null
     }
-    const messages = data?.slice(1000)
-    messages.reverse()
+    const messages = data?.slice(0, 1000)
+    messages.sort((a, b) => new Date(b.timestamp).valueOf() - new Date(a.timestamp).valueOf())
     return messages.map(({ id, from, to, timestamp, data }) => (
         <div key={`${id}-${from}-${to}`}>{new Date(timestamp).toUTCString()}: {data}</div>
     ))

@@ -1,4 +1,4 @@
-import { Provider } from 'react-redux'
+import { Provider, useStore } from 'react-redux'
 import { Canvas } from '@react-three/fiber'
 
 import { store } from './store'
@@ -19,13 +19,17 @@ function App() {
             <Messages />
           </Provider>
         </Canvas>
+        <Provider store={store}>
         <div className="h-1/2 border-gray-800 border-t-2">
           <Graph />
         </div>
+        </Provider>
       </div>
       <aside className="flex flex-col w-1/4 p-4 border-gray-800 border-l-2">
+      <Provider store={store}>
         <Log />
         <Controls />
+        </Provider>
       </aside>
     </main>
   )

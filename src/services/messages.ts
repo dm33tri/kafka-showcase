@@ -28,11 +28,15 @@ export const messagesApi = createApi({
       providesTags: ['Message'],
     }),
     sendMessage: builder.mutation<void, void>({
-      query: () => 'message',
+      query: () => ({
+        url: `message`,
+        method: 'post',
+        validateStatus: () => true,
+      }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         const timestamp = Date.now()
         const id = getMessageId()
-        const { data: nodes } = nodesApi.endpoints.getAllNodes.select()(store.getState())
+        const { data: { nodes } = {} } = nodesApi.endpoints.getAllNodes.select()(store.getState())
         if (!nodes) {
           return
         }

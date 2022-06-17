@@ -52,7 +52,7 @@ export const Node: FC<NodeProps> = ({ id, type, initialPosition }) => {
       ref={ref}
     >
       <meshBasicMaterial color="black" />
-      <Text position={[0, 0, 1]} fontSize={0.25}>
+      <Text position={[0, 0, 1]} fontSize={0.1}>
         {id}
       </Text>
     </RoundedBox>
@@ -60,17 +60,17 @@ export const Node: FC<NodeProps> = ({ id, type, initialPosition }) => {
 }
 
 export const Nodes: FC = () => {
-  const { data } = useGetAllNodesQuery()
+  const { data: { nodes: data } = {} } = useGetAllNodesQuery()
 
   const nodes = useMemo(() => {
     if (!data) {
       return null
     }
 
-    const circle = new THREE.EllipseCurve(0, 0, 2, 2, 0, 2 * Math.PI, false, 0).getPoints(data.length)
+    const circle = new THREE.EllipseCurve(0, 0, 2, 2, 0, 2 * Math.PI, false, 0).getPoints(data.length - 1)
 
     return data.map(({ id, type }, index) => {
-      const initialPosition = new THREE.Vector3(circle[index].x, circle[index].y, 0)
+      const initialPosition = type === 'TOPIC' ? new THREE.Vector3(0, 0, 0) : new THREE.Vector3(circle[index].x, circle[index].y, 0)
       return <Node key={id} id={id} type={type} initialPosition={initialPosition} />
     })
   }, [data])

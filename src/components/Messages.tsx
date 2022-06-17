@@ -10,8 +10,8 @@ import { NodeGeometries } from "../slices/nodeGeometries"
 import { useGetMessageQuery } from "../services/messages"
 
 type MessageProps = {
-  from: number
-  to: number
+  from: string
+  to: string
 }
 
 export const Message: FC<MessageProps> = ({ from, to }) => {
@@ -40,11 +40,12 @@ export const Message: FC<MessageProps> = ({ from, to }) => {
 
 export const Messages: FC = () => {
   const { data } = useGetMessageQuery()
+  console.log(data)
 
   const messages = useMemo(() => {
-    return data?.flatMap(({ id, from, to: toMany }) => toMany.map(to => (
+    return data?.map(({ id, from, to }) => (
       <Message key={`${id}-${from}-${to}`} from={from} to={to} />
-    )))
+    ))
   }, [data])
 
   return (

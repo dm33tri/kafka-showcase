@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { is } from 'immer/dist/internal'
 import { BASE_URL } from '../constants'
 import { messagesApi, getMessageId } from './messages'
 
@@ -6,6 +7,8 @@ export type Node = {
   id: string
   type: 'CONSUMER' | 'PRODUCER' | 'TOPIC'
 }
+
+const ws = new WebSocket(`ws://178.20.45.246:8080/connection`)
 
 export const nodesApi = createApi({
   reducerPath: 'nodesApi',
@@ -18,10 +21,11 @@ export const nodesApi = createApi({
         method: 'post',
         validateStatus: () => true
       }),
-      async onQueryStarted(id, { dispatch }) {
-        dispatch(nodesApi.util.updateQueryData('getAllNodes', undefined, nodes => {
-          nodes.push({ id: `consumer_${id}`, type: 'CONSUMER' })
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        dispatch(nodesApi.util.updateQueryData('getAllNodes', undefined, data => {
+          data.nodes.push({ id: `consumer_${id}`, type: 'CONSUMER' })
         }))
+        await queryFulfilled
       }
     }),
     createProducer: builder.mutation<void, number>({
@@ -30,40 +34,48 @@ export const nodesApi = createApi({
         method: 'post',
         validateStatus: () => true,
       }),
-      async onQueryStarted(id, { dispatch }) {
-        dispatch(nodesApi.util.updateQueryData('getAllNodes', undefined, nodes => {
-          nodes.push({ id: `producer_${id}`, type: 'PRODUCER' })
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        dispatch(nodesApi.util.updateQueryData('getAllNodes', undefined, data => {
+          data.nodes.push({ id: `producer_${id}`, type: 'PRODUCER' })
         }))
+        await queryFulfilled
       },
     }),
-    getAllNodes: builder.query<Node[], void>({
+    getAllNodes: builder.query<{ nodes: Node[] }, void>({
       providesTags: ['Nodes'],
       queryFn() {
-        return { data: [{ type: 'TOPIC', id: 'topic_0' }] }
+        return { data: { nodes: [
+          { type: 'TOPIC', id: 'topic_0' },
+          { type: 'CONSUMER', id: 'consumer_0' },
+          { type: 'PRODUCER', id: 'producer_0' },
+          { type: 'CONSUMER', id: 'consumer_1' },
+          { type: 'PRODUCER', id: 'producer_1' },
+          { type: 'CONSUMER', id: 'consumer_2' },
+          { type: 'PRODUCER', id: 'producer_2' },
+          { type: 'CONSUMER', id: 'consumer_3' },
+          { type: 'PRODUCER', id: 'producer_3' },
+          { type: 'CONSUMER', id: 'consumer_4' },
+          { type: 'PRODUCER', id: 'producer_5' },
+        ] } }
       },
       async onCacheEntryAdded(_, { cacheEntryRemoved, cacheDataLoaded, dispatch }) {
-        const { data: nodes } = await cacheDataLoaded
-        const [, id] = nodes.slice().reverse().find(node => node.type === 'CONSUMER')?.id.match(/consumer_(\d+)/) || []
-        if (!id) {
-          return
-        }
-        const ws = new WebSocket('ws://localhost:8080')
+        const { data: { nodes } } = await cacheDataLoaded
+        const ids = nodes.slice(0).reverse().filter(node => node.type === 'CONSUMER')?.map(({ id }) => id)
         const listener = (event: MessageEvent) => {
-          try {
-            const message = JSON.parse(event.data)
-            const { From: from, To: to, Message: data, Timestamp: timestamp } = message
-            dispatch(messagesApi.util.updateQueryData('getMessage', undefined, messages => {
-              messages.push({
-                id: getMessageId(),
-                from: 'topic_0',
-                timestamp: new Date(timestamp).valueOf(),
-                data: `from ${from}: ${data}`,
-                to: to
-              })
-            }))
-          } catch {}
+          const message = JSON.parse(event.data)
+          const { From: from, To: to, Message: data, Timestamp: timestamp } = message
+          
+          ids.forEach(id => dispatch(messagesApi.util.updateQueryData('getMessage', undefined, messages => {
+            messages.push({
+              id: getMessageId(),
+              from: 'topic_0',
+              timestamp: Date.now(),
+              data: `from ${from}: ${data}`,
+              to: to
+            })
+          })))
         }
-        ws.send(id)
+        ids.forEach(id => ws.send(id))
         ws.addEventListener('message', listener)
         await cacheEntryRemoved
         ws.close()
