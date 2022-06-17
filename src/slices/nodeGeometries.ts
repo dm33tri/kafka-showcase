@@ -3,14 +3,14 @@ import type { Mesh, BufferGeometry } from "three"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type NodeGeometries = {
-    [id: number]: RefObject<Mesh<BufferGeometry>>
+    [id: string]: RefObject<Mesh<BufferGeometry>>
 }
 
 export const nodeGeometriesSlice = createSlice({
     name: 'nodeGeometries',
     initialState: {} as NodeGeometries,
     reducers: {
-        setNodeGeometry: (state, action: PayloadAction<{ id: number; ref: RefObject<Mesh<BufferGeometry>> }>) => {
+        setNodeGeometry: (state, action: PayloadAction<{ id: string; ref: RefObject<Mesh<BufferGeometry>> }>) => {
             const { id, ref } = action.payload
             state[id] = ref
         }

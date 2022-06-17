@@ -36,11 +36,7 @@ export const Node: FC<NodeProps> = ({ id, initialPosition }) => {
 
   const onClick = useCallback(() => {
     if (nodes) {
-      sendMessage({
-        from: id,
-        to: nodes.filter(({ id: otherId }) => otherId !== id).map(node => node.id),
-        data: Math.random().toString()
-      })
+      sendMessage()
     }
   }, [sendMessage, nodes])
 
@@ -70,9 +66,9 @@ export const Nodes: FC = () => {
 
     const circle = new THREE.EllipseCurve(0, 0, 3, 3, 0, 2 * Math.PI, false, 0).getPoints(data.length)
 
-    return data.map(({ id }, index) => {
+    return data.map(({ id, type }, index) => {
       const initialPosition = new THREE.Vector3(circle[index].x, circle[index].y, 0)
-      return <Node key={id} id={id} initialPosition={initialPosition} />
+      return <Node key={id} id={id} type={type} initialPosition={initialPosition} />
     })
   }, [data])
 
